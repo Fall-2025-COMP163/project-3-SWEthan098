@@ -320,21 +320,33 @@ def warrior_power_strike(character, enemy):
 
 def mage_fireball(character, enemy):
     """Mage special ability"""
+    character_damage = character['magic'] * 2 - (enemy['magic'] // 4)
+    if character_damage < 1:
+        character_damage = 1
     # TODO: Implement fireball
     # Double magic damage
-    pass
+    
 
 def rogue_critical_strike(character, enemy):
     """Rogue special ability"""
+    import random
+    if random.random() < 0.5:
+        character_damage = character['strength'] * 3 - (enemy['strength'] // 4)
+        if character_damage < 1:
+            character_damage = 1
+    else:
+        print("Critical strike failed!")
     # TODO: Implement critical strike
     # 50% chance for triple damage
-    pass
+    
 
 def cleric_heal(character):
     """Cleric special ability"""
+    character['health'] += 30
+    if character['health'] > character['max_health']:
+        character['health'] = character['max_health']
     # TODO: Implement healing
     # Restore 30 HP (not exceeding max_health)
-    pass
 
 # ============================================================================
 # COMBAT UTILITIES
@@ -346,8 +358,12 @@ def can_character_fight(character):
     
     Returns: True if health > 0 and not in battle
     """
+    if character['health'] > 0:
+        return True
+    else:
+        return False
     # TODO: Implement fight check
-    pass
+    
 
 def get_victory_rewards(enemy):
     """
@@ -355,8 +371,9 @@ def get_victory_rewards(enemy):
     
     Returns: Dictionary with 'xp' and 'gold'
     """
+    return {'xp': enemy['xp_reward'], 'gold': enemy['gold_reward']}
+
     # TODO: Implement reward calculation
-    pass
 
 def display_combat_stats(character, enemy):
     """
@@ -364,10 +381,12 @@ def display_combat_stats(character, enemy):
     
     Shows both character and enemy health/stats
     """
+
     # TODO: Implement status display
+    print("=== COMBAT STATS ===")
     print(f"\n{character['name']}: HP={character['health']}/{character['max_health']}")
     print(f"{enemy['name']}: HP={enemy['health']}/{enemy['max_health']}")
-    pass
+    
 
 def display_battle_log(message):
     """
@@ -375,7 +394,7 @@ def display_battle_log(message):
     """
     # TODO: Implement battle log display
     print(f">>> {message}")
-    pass
+    
 
 # ============================================================================
 # TESTING
