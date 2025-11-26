@@ -34,13 +34,35 @@ def create_character(name, character_class):
     
     Raises: InvalidCharacterClassError if class is not valid
     """
-    Warrior = {'health': 100, 'strength': 15, 'magic': 5, 'level': 1, "xp":0, "gold":100, "inventory":[], "active_quests":[], "completed_quests":[]}
-    Mage = {'health': 100, 'strength': 5, 'magic': 15, 'level': 1, "xp":0, "gold":100, "inventory":[], "active_quests":[], "completed_quests":[]}
-    Rogue = {'health': 100, 'strength': 10, 'magic': 10, 'level': 1, "xp":0, "gold":100, "inventory":[], "active_quests":[], "completed_quests":[]}
-    Cleric = {'health': 100, 'strength': 5, 'magic': 5, 'level': 1, "xp":0, "gold":100, "inventory":[], "active_quests":[], "completed_quests":[]}
-    valid_classes = {'Warrior': Warrior, 'Mage': Mage, 'Rogue': Rogue, 'Cleric': Cleric}
-    if character_class not in valid_classes:
-        raise InvalidCharacterClassError(f"Invalid character class: {character_class}")
+    base_stats = {
+        'Warrior': {'health': 120, 'strength': 15, 'magic': 5},
+        'Mage': {'health': 80, 'strength': 5, 'magic': 15},
+        'Rogue': {'health': 100, 'strength': 12, 'magic': 8},
+        'Cleric': {'health': 90, 'strength': 8, 'magic': 10},
+    }
+
+    if character_class not in base_stats:
+        raise ValueError(f"Class '{character_class}' is not recognized.")
+
+    stats = base_stats[character_class]
+
+    character = {
+        'name': name,
+        'class': character_class,
+        'level': 1,
+        'experience': 0,
+        'gold': 100,
+        'health': stats['health'],
+        'max_health': stats['health'],
+        'strength': stats['strength'],
+        'magic': stats['magic'],
+        'inventory': [],
+        'equipment': {},
+        'active_quests': [],
+        'completed_quests': []
+    }
+
+    return character
     # TODO: Implement character creation
     # Validate character_class first
     # Example base stats:
@@ -81,26 +103,31 @@ def save_character(character, save_directory="data/save_games"):
     """
     #Verifies there is a directory to save the file in
     os.makedirs(save_directory, exist_ok=True)
-    
     filename = f"{character['name']}_save.txt"
     filepath = os.path.join(save_directory, filename)
-    inventory = ",".join(character['inventory'])
-    active_quests = ",".join(character['active_quests'])
-    completed_quests = ",".join(character['completed_quests'])
-    with open (filepath, "w") as file:
-       file.write(f"NAME: {character['name']}\n")
-       file.write(f"CLASS: {character['class']}\n")
-       file.write(f"LEVEL: {character['level']}\n")
-       file.write(f"HEALTH: {character['health']}\n")
-       file.write(f"MAX_HEALTH: {character['max_health']}\n")
-       file.write(f"STRENGTH: {character['strength']}\n")
-       file.write(f"MAGIC: {character['magic']}\n")
-       file.write(f"EXPERIENCE: {character['experience']}\n")
-       file.write(f"GOLD: {character['gold']}\n")
-       file.write(f"INVENTORY: {inventory}\n")
-       file.write(f"ACTIVE_QUESTS: {active_quests}\n")
-       file.write(f"COMPLETED_QUESTS: {completed_quests}\n")
-    return True
+
+    inventory = ",".join(character.get('inventory', []))
+    active_quests = ",".join(character.get('active_quests', []))
+    completed_quests = ",".join(character.get('completed_quests', []))
+
+    try:
+        with open(filepath, 'w') as f:
+            f.write(f"NAME: {character['name']}\n")
+            f.write(f"CLASS: {character['class']}\n")
+            f.write(f"LEVEL: {character['level']}\n")
+            f.write(f"HEALTH: {character['health']}\n")
+            f.write(f"MAX_HEALTH: {character['max_health']}\n")
+            f.write(f"STRENGTH: {character['strength']}\n")
+            f.write(f"MAGIC: {character['magic']}\n")
+            f.write(f"EXPERIENCE: {character['experience']}\n")
+            f.write(f"GOLD: {character['gold']}\n")
+            f.write(f"INVENTORY: {inventory}\n")
+            f.write(f"ACTIVE_QUESTS: {active_quests}\n")
+            f.write(f"COMPLETED_QUESTS: {completed_quests}\n")
+        return True
+    except (IOError, PermissionError) as e:
+        print(f"Error saving character: {e}")
+        return False
 
     # TODO: Implement save functionality
     # Create save_directory if it doesn't exist
