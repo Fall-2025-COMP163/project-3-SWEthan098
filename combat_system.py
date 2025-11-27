@@ -443,10 +443,10 @@ if __name__ == "__main__":
     #     'magic': 5
     # }
     #
-    battle = SimpleBattle("test_char", "goblin")
-    try:
-         result = battle.start_battle()
-         print(f"Battle result: {result}")
-    except CharacterDeadError:
-         print("Character is dead!")
+    #battle = SimpleBattle("test_char", "goblin")
+    #try:
+    #     result = battle.start_battle()
+    #     print(f"Battle result: {result}")
+    #except CharacterDeadError:
+    #     print("Character is dead!")
 

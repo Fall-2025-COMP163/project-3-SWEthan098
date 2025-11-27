@@ -34,32 +34,36 @@ def create_character(name, character_class):
     
     Raises: InvalidCharacterClassError if class is not valid
     """
-    base_stats = {
-        'Warrior': {'health': 120, 'strength': 15, 'magic': 5},
-        'Mage': {'health': 80, 'strength': 5, 'magic': 15},
-        'Rogue': {'health': 100, 'strength': 12, 'magic': 8},
-        'Cleric': {'health': 90, 'strength': 8, 'magic': 10},
+    Warrior = {'health': 100, 'strength': 15, 'magic': 5, 'level': 1, "experience": 0, "gold": 100}
+    Mage =    {'health': 100, 'strength': 5,  'magic': 15, 'level': 1, "experience": 0, "gold": 100}
+    Rogue =   {'health': 100, 'strength': 10, 'magic': 10, 'level': 1, "experience": 0, "gold": 100}
+    Cleric =  {'health': 100, 'strength': 5,  'magic': 5,  'level': 1, "experience": 0, "gold": 100}
+
+    valid_classes = {
+        "Warrior": Warrior,
+        "Mage": Mage,
+        "Rogue": Rogue,
+        "Cleric": Cleric
     }
 
-    if character_class not in base_stats:
-        raise ValueError(f"Class '{character_class}' is not recognized.")
+    if character_class not in valid_classes:
+        raise InvalidCharacterClassError(f"Invalid character class: {character_class}")
 
-    stats = base_stats[character_class]
+    base = valid_classes[character_class]
 
     character = {
-        'name': name,
-        'class': character_class,
-        'level': 1,
-        'experience': 0,
-        'gold': 100,
-        'health': stats['health'],
-        'max_health': stats['health'],
-        'strength': stats['strength'],
-        'magic': stats['magic'],
-        'inventory': [],
-        'equipment': {},
-        'active_quests': [],
-        'completed_quests': []
+        "name": name,
+        "class": character_class,
+        "level": base["level"],
+        "health": base["health"],
+        "max_health": base["health"],
+        "strength": base["strength"],
+        "magic": base["magic"],
+        "experience": base["experience"],   # MUST MATCH TEST KEY
+        "gold": base["gold"],
+        "inventory": [],
+        "active_quests": [],
+        "completed_quests": []
     }
 
     return character
