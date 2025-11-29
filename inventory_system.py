@@ -166,7 +166,10 @@ def use_item(character, item_id, item_data):
     stat_name, value = parse_item_effect(item_data['effect'])
     apply_stat_effect(character, stat_name, value)
     remove_item_from_inventory(character, item_id)
-    return f"Used {item_data['name']}, {stat_name} increased by {value}."
+    
+    # Use item name if available, otherwise use item_id
+    item_name = item_data.get('name', item_id)
+    return f"Used {item_name}, {stat_name} increased by {value}."
     
     # TODO: Implement item usage
     # Check if character has the item
@@ -196,25 +199,29 @@ def equip_weapon(character, item_id, item_data):
         ItemNotFoundError if item not in inventory
         InvalidItemTypeError if item type is not 'weapon'
     """
+    ensure_character_keys(character)  # Ensure character has equipment keys
+    
     if item_id not in character["inventory"]:
         raise ItemNotFoundError(f"Item {item_id} not found in inventory.")
     if item_data["type"] != "weapon":
         raise InvalidItemTypeError(f"Item {item_id} is not a weapon.")
-
+    
     # Unequip old weapon
     if character["equipped_weapon"] is not None:
         old_weapon_id = unequip_weapon(character)
         add_item_to_inventory(character, old_weapon_id)
-
+    
     # Apply new weapon bonus
     stat_name, value = parse_item_effect(item_data["effect"])
     character[stat_name] += value
-
+    
     # Equip it
     character["equipped_weapon"] = item_id
     remove_item_from_inventory(character, item_id)
-
-    return f"Equipped {item_data['name']}, {stat_name} increased by {value}."
+    
+    # Use item name if available, otherwise use item_id
+    item_name = item_data.get('name', item_id)
+    return f"Equipped {item_name}, {stat_name} increased by {value}."
     
     # TODO: Implement weapon equipping
     # Check item exists and is type 'weapon'
@@ -244,25 +251,29 @@ def equip_armor(character, item_id, item_data):
         ItemNotFoundError if item not in inventory
         InvalidItemTypeError if item type is not 'armor'
     """
+    ensure_character_keys(character)  # Ensure character has equipment keys
+    
     if item_id not in character["inventory"]:
         raise ItemNotFoundError(f"Item {item_id} not found in inventory.")
     if item_data["type"] != "armor":
         raise InvalidItemTypeError(f"Item {item_id} is not armor.")
-
+    
     # Unequip old armor
     if character["equipped_armor"] is not None:
         old_armor_id = unequip_armor(character)
         add_item_to_inventory(character, old_armor_id)
-
+    
     # Apply new armor bonus
     stat_name, value = parse_item_effect(item_data["effect"])
     character[stat_name] += value
-
+    
     # Equip it
     character["equipped_armor"] = item_id
     remove_item_from_inventory(character, item_id)
-
-    return f"Equipped {item_data['name']}, {stat_name} increased by {value}."
+    
+    # Use item name if available, otherwise use item_id
+    item_name = item_data.get('name', item_id)
+    return f"Equipped {item_name}, {stat_name} increased by {value}."
     # TODO: Implement armor equipping
     # Similar to equip_weapon but for armor
     

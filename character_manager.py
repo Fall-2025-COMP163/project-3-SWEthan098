@@ -63,7 +63,9 @@ def create_character(name, character_class):
         "gold": base["gold"],
         "inventory": [],
         "active_quests": [],
-        "completed_quests": []
+        "completed_quests": [],
+        "equipped_weapon": None,     
+        "equipped_armor": None        
     }
 
     return character
@@ -101,6 +103,8 @@ def save_character(character, save_directory="data/save_games"):
     INVENTORY: item1,item2,item3
     ACTIVE_QUESTS: quest1,quest2
     COMPLETED_QUESTS: quest1,quest2
+    EQUIPPED_WEAPON: weapon_id
+    EQUIPPED_ARMOR: armor_id
     
     Returns: True if successful
     Raises: PermissionError, IOError (let them propagate or handle)
@@ -110,12 +114,24 @@ def save_character(character, save_directory="data/save_games"):
     filename = f"{character['name']}_save.txt"
     filepath = os.path.join(save_directory, filename)
 
-    inventory = ",".join(character.get('inventory', []))
-    active_quests = ",".join(character.get('active_quests', []))
-    completed_quests = ",".join(character.get('completed_quests', []))
+    inventory = ",".join(character['inventory'])
+    active_quests = ",".join(character['active_quests'])
+    completed_quests = ",".join(character['completed_quests'])
+    
+    # Handle equipped items (they might be None)
+    if character['equipped_weapon'] is None:
+        equipped_weapon = ''
+    else:
+        equipped_weapon = character['equipped_weapon']
+        
+    if character['equipped_armor'] is None:
+        equipped_armor = ''
+    else:
+        equipped_armor = character['equipped_armor']
 
     try:
         with open(filepath, 'w') as f:
+            # Use a space for empty values to ensure format is always "KEY: VALUE"
             f.write(f"NAME: {character['name']}\n")
             f.write(f"CLASS: {character['class']}\n")
             f.write(f"LEVEL: {character['level']}\n")
@@ -125,14 +141,15 @@ def save_character(character, save_directory="data/save_games"):
             f.write(f"MAGIC: {character['magic']}\n")
             f.write(f"EXPERIENCE: {character['experience']}\n")
             f.write(f"GOLD: {character['gold']}\n")
-            f.write(f"INVENTORY: {inventory}\n")
-            f.write(f"ACTIVE_QUESTS: {active_quests}\n")
-            f.write(f"COMPLETED_QUESTS: {completed_quests}\n")
+            f.write(f"INVENTORY: {inventory if inventory else ' '}\n")
+            f.write(f"ACTIVE_QUESTS: {active_quests if active_quests else ' '}\n")
+            f.write(f"COMPLETED_QUESTS: {completed_quests if completed_quests else ' '}\n")
+            f.write(f"EQUIPPED_WEAPON: {equipped_weapon if equipped_weapon else ' '}\n")
+            f.write(f"EQUIPPED_ARMOR: {equipped_armor if equipped_armor else ' '}\n")
         return True
     except (IOError, PermissionError) as e:
         print(f"Error saving character: {e}")
         return False
-
     # TODO: Implement save functionality
     # Create save_directory if it doesn't exist
     # Handle any file I/O errors appropriately
@@ -158,33 +175,70 @@ def load_character(character_name, save_directory="data/save_games"):
     filepath = os.path.join(save_directory, filename)
 
     #Raises CharacterNotFoundError if the file does not exist
-
     if not os.path.exists(filepath):
         raise CharacterNotFoundError(f"Character '{character_name}' not found.")
+    
     #Tries to read the file, raises SaveFileCorruptedError if it cannot
-
     try:
-        with open (filepath, "r") as file:
+        with open(filepath, "r") as file:
             lines = file.readlines()
     except:
         raise SaveFileCorruptedError(f"Save file for character '{character_name}' is corrupted.")
+    
     character = {}
 
-    #Parses the file line by line into a dictionary, raises InvalidSaveDataError if the format is wrong
+#Parses the file line by line into a dictionary, raises InvalidSaveDataError if the format is wrong
     for line in lines:
-        if ": " not in line:
+        line = line.strip()  # Strip whitespace first
+        if not line:  # Skip empty lines
+            continue
+        if ":" not in line:  # Check for just ":" instead of ": "
             raise InvalidSaveDataError(f"Invalid data format in save file for '{character_name}'.")
-        parts = line.strip().split(": ", 1)
+        
+        # Try to split with ": " first (space after colon)
+        parts = line.split(": ", 1)
+        if len(parts) == 1:  # No space after colon, split on just ":"
+            parts = line.split(":", 1)
+        
         if len(parts) != 2:
             raise InvalidSaveDataError(f"Invalid data format in save file for '{character_name}'.")
+        
         key = parts[0]
-        value = parts[1]
+        value = parts[1].strip()  # Strip any extra whitespace from value
         character[key] = value
 
-    #Goes through the character dictionary and makes them correct lists and handles if the lsit is empty 
-    inventory = character["INVENTORY"].split(",") if character["INVENTORY"] else []
-    active_quests = character["ACTIVE_QUESTS"].split(",") if character["ACTIVE_QUESTS"] else []
-    completed_quests = character["COMPLETED_QUESTS"].split(",") if character["COMPLETED_QUESTS"] else []
+    #Goes through the character dictionary and makes them correct lists and handles if the list is empty 
+    if character["INVENTORY"]:
+        inventory = character["INVENTORY"].split(",")
+    else:
+        inventory = []
+        
+    if character["ACTIVE_QUESTS"]:
+        active_quests = character["ACTIVE_QUESTS"].split(",")
+    else:
+        active_quests = []
+        
+    if character["COMPLETED_QUESTS"]:
+        completed_quests = character["COMPLETED_QUESTS"].split(",")
+    else:
+        completed_quests = []
+    
+    # Handle equipped items (convert empty string to None)
+    if "EQUIPPED_WEAPON" in character:
+        if character["EQUIPPED_WEAPON"]:
+            equipped_weapon = character["EQUIPPED_WEAPON"]
+        else:
+            equipped_weapon = None
+    else:
+        equipped_weapon = None
+        
+    if "EQUIPPED_ARMOR" in character:
+        if character["EQUIPPED_ARMOR"]:
+            equipped_armor = character["EQUIPPED_ARMOR"]
+        else:
+            equipped_armor = None
+    else:
+        equipped_armor = None
 
     #Sets the dictionary up to how we want it to be returned
     character_dict = {
@@ -199,10 +253,11 @@ def load_character(character_name, save_directory="data/save_games"):
         "gold": int(character["GOLD"]),
         "inventory": inventory,
         "active_quests": active_quests,
-        "completed_quests": completed_quests
+        "completed_quests": completed_quests,
+        "equipped_weapon": equipped_weapon,
+        "equipped_armor": equipped_armor
     }
     return character_dict
-
         
     # TODO: Implement load functionality
     # Check if file exists → CharacterNotFoundError
