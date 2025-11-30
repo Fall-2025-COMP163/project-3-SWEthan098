@@ -2,9 +2,10 @@
 COMP 163 - Project 3: Quest Chronicles
 Character Manager Module - Starter Code
 
-Name: [Your Name Here]
+Name: [Ethan Hall]
 
-AI Usage: [Document any AI assistance used]
+AI Usage: [Helped with correcting the character creation dictionary and the file and the save and load functions because it kept
+raising errors because of formatting issues.]
 
 This module handles character creation, loading, and saving.
 """
@@ -34,11 +35,15 @@ def create_character(name, character_class):
     
     Raises: InvalidCharacterClassError if class is not valid
     """
+
+    # Base stats for each class
     Warrior = {'health': 100, 'strength': 15, 'magic': 5, 'level': 1, "experience": 0, "gold": 100}
     Mage =    {'health': 100, 'strength': 5,  'magic': 15, 'level': 1, "experience": 0, "gold": 100}
     Rogue =   {'health': 100, 'strength': 10, 'magic': 10, 'level': 1, "experience": 0, "gold": 100}
     Cleric =  {'health': 100, 'strength': 5,  'magic': 5,  'level': 1, "experience": 0, "gold": 100}
 
+
+    # Validates the character class
     valid_classes = {
         "Warrior": Warrior,
         "Mage": Mage,
@@ -46,6 +51,7 @@ def create_character(name, character_class):
         "Cleric": Cleric
     }
 
+    #Raises error if class other than the ones validated are inputted
     if character_class not in valid_classes:
         raise InvalidCharacterClassError(f"Invalid character class: {character_class}")
 
@@ -59,7 +65,7 @@ def create_character(name, character_class):
         "max_health": base["health"],
         "strength": base["strength"],
         "magic": base["magic"],
-        "experience": base["experience"],   # MUST MATCH TEST KEY
+        "experience": base["experience"],   # MUST MATCH TEST KEY #This was throwing SOOO many errors
         "gold": base["gold"],
         "inventory": [],
         "active_quests": [],
@@ -114,11 +120,13 @@ def save_character(character, save_directory="data/save_games"):
     filename = f"{character['name']}_save.txt"
     filepath = os.path.join(save_directory, filename)
 
+    # Converts lists to comma-separated strings
     inventory = ",".join(character['inventory'])
     active_quests = ",".join(character['active_quests'])
     completed_quests = ",".join(character['completed_quests'])
     
     # Handle equipped items (they might be None)
+    # Helps with formatting issues
     if character['equipped_weapon'] is None:
         equipped_weapon = ''
     else:
@@ -132,6 +140,7 @@ def save_character(character, save_directory="data/save_games"):
     try:
         with open(filepath, 'w') as f:
             # Use a space for empty values to ensure format is always "KEY: VALUE"
+            #Helps with formatting so there are no errors
             f.write(f"NAME: {character['name']}\n")
             f.write(f"CLASS: {character['class']}\n")
             f.write(f"LEVEL: {character['level']}\n")
@@ -147,9 +156,13 @@ def save_character(character, save_directory="data/save_games"):
             f.write(f"EQUIPPED_WEAPON: {equipped_weapon if equipped_weapon else ' '}\n")
             f.write(f"EQUIPPED_ARMOR: {equipped_armor if equipped_armor else ' '}\n")
         return True
+    
+    #Handles both IOError and PermissionError
     except (IOError, PermissionError) as e:
         print(f"Error saving character: {e}")
         return False
+    
+
     # TODO: Implement save functionality
     # Create save_directory if it doesn't exist
     # Handle any file I/O errors appropriately
@@ -224,6 +237,7 @@ def load_character(character_name, save_directory="data/save_games"):
         completed_quests = []
     
     # Handle equipped items (convert empty string to None)
+    #Formatting fix
     if "EQUIPPED_WEAPON" in character:
         if character["EQUIPPED_WEAPON"]:
             equipped_weapon = character["EQUIPPED_WEAPON"]
@@ -240,7 +254,8 @@ def load_character(character_name, save_directory="data/save_games"):
     else:
         equipped_armor = None
 
-    #Sets the dictionary up to how we want it to be returned
+    #Sets the dictionary up to how I want it to be returned
+    #So it doesn't convert everything to a string or mess up how the dict is formatted
     character_dict = {
         "name": character["NAME"],
         "class": character["CLASS"],
@@ -363,7 +378,10 @@ def add_gold(character, amount):
     Returns: New gold total
     Raises: ValueError if result would be negative
     """
+
+    #Adds the amount to the character's gold
     character['gold'] += amount
+    #Handles ValueError to not support negatives
     if character['gold'] < 0:
         raise ValueError("Gold amount cannot be negative.")
     return character['gold']
@@ -405,6 +423,8 @@ def is_character_dead(character):
     
     Returns: True if dead, False if alive
     """
+
+    #When character health is 0 or below, they die
     if character['health'] <= 0:
         return True
     else:
@@ -418,6 +438,8 @@ def revive_character(character):
     
     Returns: True if revived
     """
+
+    #revives and sets health to half max health
     if character['health'] <= 0:
         character['health'] = character['max_health'] // 2
         return True
@@ -440,6 +462,8 @@ def validate_character_data(character):
     Returns: True if valid
     Raises: InvalidSaveDataError if missing fields or invalid types
     """
+
+    #Checks structure of the character dictionary
     valid_character = {
         "name": str,
         "class": str,

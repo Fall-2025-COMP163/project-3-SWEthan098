@@ -78,13 +78,16 @@ def new_game():
     Creates character and starts game loop
     """
     global current_character
+    
     try:
         character_name = input()
         character_class = input()
+        #Calls create_character to make character 
         current_character = character_manager.create_character(character_name, character_class)
     except InvalidCharacterClassError as e:
         print(e)
     character_manager.save_character(current_character)
+    #Starts game loop
     game_loop()
     
     # TODO: Implement new game creation
@@ -104,7 +107,7 @@ def load_game():
     Prompts user to select one
     """
     global current_character
-    
+    #Calls load function to get an alr saved player and continues game loop
     try:
         character_name = input()
         current_character = character_manager.load_character(character_name)
@@ -155,6 +158,7 @@ def game_menu():
     
     Returns: Integer choice (1-6)
     """
+    #Builds game menu
     print("\nGame Menu:")
     print("1. View Character Stats")
     print("2. View Inventory")
@@ -226,7 +230,7 @@ def quest_menu():
 def explore():
     """Find and fight random enemies"""
     global current_character
-
+    #Function for wandering tryna find a enemy like looking through a bush in pokemon
     character_level = current_character.level
     combat_system.get_random_enemy_for_level(character_level)
     combat_system.SimpleBattle

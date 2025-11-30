@@ -22,6 +22,7 @@ MAX_INVENTORY_SIZE = 20
 # ============================================================================
 # INVENTORY MANAGEMENT
 # ============================================================================
+#Helps with formatting character dictionary so no errors occur
 def ensure_character_keys(character):
     """
     Ensure the character dictionary has all required keys
@@ -58,6 +59,7 @@ def add_item_to_inventory(character, item_id):
     Returns: True if added successfully
     Raises: InventoryFullError if inventory is at max capacity
     """
+    #Checks if full
     if len(character['inventory']) >= MAX_INVENTORY_SIZE:
         raise InventoryFullError("Cannot add item: Inventory is full.")
     character['inventory'].append(item_id)
@@ -78,6 +80,7 @@ def remove_item_from_inventory(character, item_id):
     Returns: True if removed successfully
     Raises: ItemNotFoundError if item not in inventory
     """
+    #Checks if item exists in inventory
     if item_id not in character['inventory']:
         raise ItemNotFoundError(f"Item {item_id} not found in inventory.")
     character['inventory'].remove(item_id)
@@ -116,6 +119,7 @@ def get_inventory_space_remaining(character):
     
     Returns: Integer representing available slots
     """
+    #Calculates remaining space in inventory
     if MAX_INVENTORY_SIZE - len(character['inventory']) >= 0:
         return MAX_INVENTORY_SIZE - len(character['inventory'])
     else:
@@ -129,7 +133,9 @@ def clear_inventory(character):
     
     Returns: List of removed items
     """
+    #Takes current inventory and clears it
     removed_items = character['inventory']
+    #Reset inventory to empty list
     character['inventory'] = []
     return removed_items
     # TODO: Implement inventory clearing
@@ -159,6 +165,7 @@ def use_item(character, item_id, item_data):
         ItemNotFoundError if item not in inventory
         InvalidItemTypeError if item type is not 'consumable'
     """
+    #does checks and applies consumable item effects
     if item_id not in character['inventory']:
         raise ItemNotFoundError(f"Item {item_id} not found in inventory.")
     if item_data['type'] != 'consumable':
@@ -351,10 +358,12 @@ def purchase_item(character, item_id, item_data):
         InsufficientResourcesError if not enough gold
         InventoryFullError if inventory is full
     """
+    #Checks if character has enough gold to purchase item
     if character['gold'] < item_data['cost']:
         raise InsufficientResourcesError("Not enough gold to purchase item.")
     if len(character['inventory']) >= MAX_INVENTORY_SIZE:
         raise InventoryFullError("Cannot purchase item: Inventory is full.")
+    #This subtracts gold and adds item to inventory
     character['gold'] -= item_data['cost']
     character['inventory'].append(item_id)
     return True
@@ -379,9 +388,10 @@ def sell_item(character, item_id, item_data):
     """
     if item_id not in character['inventory']:
         raise ItemNotFoundError(f"Item {item_id} not found in inventory.")
-    
+    #formula for sell price
     sell_price = item_data['cost'] // 2
     remove_item_from_inventory(character, item_id)
+    #This adds gold to character after selling item
     character['gold'] += sell_price
     return sell_price
     # TODO: Implement selling
@@ -405,6 +415,7 @@ def parse_item_effect(effect_string):
     Returns: Tuple of (stat_name, value)
     Example: "health:20" → ("health", 20)
     """
+    #Splits the effect string into stat and value parts
     parts = effect_string.split(":")
     return parts[0], int(parts[1])
     # TODO: Implement effect parsing
@@ -420,6 +431,7 @@ def apply_stat_effect(character, stat_name, value):
     
     Note: health cannot exceed max_health
     """
+    #Give the buff to the character based on stat name and value
     character[stat_name] += value
     if stat_name == "health" and character["health"] > character["max_health"]:
         character["health"] = character["max_health"]
@@ -477,7 +489,7 @@ def display_inventory(character, item_data_dict):
 
         qty = counts[item_id]
         lines.append(f"{name} (Type: {item_type}) x{qty}")
-
+    #returns the formatted inventory string
     return "\n".join(lines)
 
     

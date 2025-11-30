@@ -36,6 +36,7 @@ def load_quests(filename="data/quests.txt"):
     Returns: Dictionary of quests {quest_id: quest_data_dict}
     Raises: MissingDataFileError, InvalidDataFormatError, CorruptedDataError
     """
+    #Loads quest data from a file and returns a dictionary of quests
     try:
         with open(filename, 'r') as file:
             lines = file.readlines()
@@ -43,10 +44,10 @@ def load_quests(filename="data/quests.txt"):
         raise MissingDataFileError(f"Quest file is not found: {filename}")
     except Exception:
         raise CorruptedDataError(f"Quest file is unreadable: {filename}")
-    
+    #crearting empty quest dictionary
     quest = {}
     current_block = []
-
+    #Looks through each line in the file
     for line in lines:
         stripped = line.strip()
         if stripped == "":
@@ -55,9 +56,10 @@ def load_quests(filename="data/quests.txt"):
                 validate_quest_data(quest_dict)
                 quest[quest_dict['quest_id']] = quest_dict
                 current_block = []
+        #If line is not blank, add to current block
         else:
             current_block.append(stripped)
-    
+    #Process last block if exists
     if current_block:
         quest_dict = parse_quest_block(current_block)
         validate_quest_data(quest_dict)
@@ -82,6 +84,7 @@ def load_items(filename="data/items.txt"):
     Returns: Dictionary of items {item_id: item_data_dict}
     Raises: MissingDataFileError, InvalidDataFormatError, CorruptedDataError
     """
+    #Loads item data from a file and returns a dictionary of items
     try:
         with open(filename, 'r') as f:
             lines = f.readlines()
@@ -92,7 +95,7 @@ def load_items(filename="data/items.txt"):
     
     item = {}
     current_block = []
-
+    #Looks through each line in the file
     for line in lines:
         stripped = line.strip()
         if stripped == "":
@@ -103,7 +106,7 @@ def load_items(filename="data/items.txt"):
                 current_block = []
         else:
             current_block.append(stripped)
-
+    #goes through last block if exists
     if current_block:
         item_dict = parse_item_block(current_block)
         validate_item_data(item_dict)
@@ -122,6 +125,7 @@ def validate_quest_data(quest_dict):
     Returns: True if valid
     Raises: InvalidDataFormatError if missing required fields
     """
+    #Sets up required fields
     required_fields = [
         "quest_id",
         "title",
@@ -137,7 +141,7 @@ def validate_quest_data(quest_dict):
             raise InvalidDataFormatError(f"Missing field in quest: {field}")
         
     numeric_fields = ["reward_xp", "reward_gold", "required_level"]
-
+    #checking numeric fields
     for key in numeric_fields:
         if not isinstance(quest_dict[key], int):
             raise InvalidDataFormatError(f"Field {key} must be an integer")
@@ -245,19 +249,20 @@ def parse_quest_block(lines):
     Returns: Dictionary with quest data
     Raises: InvalidDataFormatError if parsing fails
     """
+    #Sets up empty quest dictionary
     quest = {}
-
+    #Goes through each line in the block
     for line in lines:
         if ":" not in line:
             raise InvalidDataFormatError(f"Quest line missing ':' seperator")
-        
+        #Splits line into key and value parts
         key, value = line.split(":", 1)
-
+        #Cleans up key and value
         key = key.strip().lower()
         value = value.strip()
 
         quest[key] = value
-
+    #Convert numeric fields to integers
     try:
         quest["reward_xp"] = int(quest["reward_xp"])
         quest["reward_gold"] = int(quest["reward_gold"])
@@ -281,8 +286,9 @@ def parse_item_block(lines):
     Returns: Dictionary with item data
     Raises: InvalidDataFormatError if parsing fails
     """
+    #Sets up empty item dictionary
     item = {}
-
+    #Goes through each line in the block
     for line in lines:
         if ": " not in line:
             raise InvalidDataFormatError("Item line missing ': ' separator")

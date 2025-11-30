@@ -2,7 +2,7 @@
 COMP 163 - Project 3: Quest Chronicles
 Combat System Module - Starter Code
 
-Name: [Your Name Here]
+Name: [Ethan Hall]
 
 AI Usage: [Document any AI assistance used]
 
@@ -32,7 +32,7 @@ def create_enemy(enemy_type):
     Returns: Enemy dictionary
     Raises: InvalidTargetError if enemy_type not recognized
     """
-
+    #Sets up base stats for enemies
     goblin_stats = {
         "name": "Goblin",
         "health": 50,
@@ -61,6 +61,7 @@ def create_enemy(enemy_type):
         "gold_reward": 100
     }
 
+    #.lower runs a case insensitive check
     if enemy_type.lower() == "goblin":
         return goblin_stats
     elif enemy_type.lower() == "orc":
@@ -85,6 +86,8 @@ def get_random_enemy_for_level(character_level):
     
     Returns: Enemy dictionary
     """
+
+    #Simple level requirement check
     if character_level <= 2:
         return create_enemy("goblin")
     elif 3 <= character_level <= 5:
@@ -141,14 +144,15 @@ class SimpleBattle:
         while self.combat_active:
             self.turn_counter += 1
             self.player_turn()
-        #Handles if combat ends
+        #Handles if combat continues
             if not self.combat_active:
                 break
-
+            #Handles if enemy dies which will end fight before enemy turn
             if self.enemy['health'] <= 0:
                 self.combat_active = False
                 break
             self.enemy_turn()
+        #Determines winner and gives rewards if player wins
         if self.character['health'] > 0:
             rewards = get_victory_rewards(self.enemy)
             print("Enemy defeated!")
@@ -157,6 +161,7 @@ class SimpleBattle:
                 'xp_gained': rewards['xp'],
                 'gold_gained': rewards['gold']
             }
+        #Defeat 
         else:
             return {'winner': 'enemy', 'xp_gained': 0, 'gold_gained': 0}
         # TODO: Implement battle loop
@@ -176,9 +181,12 @@ class SimpleBattle:
         
         Raises: CombatNotActiveError if called outside of battle
         """
+
+        #Checks if combat is active
         if not self.combat_active:
             raise CombatNotActiveError("Cannot take player turn when combat is not active.")
         else:
+            #Gives battle options
             print("1. Basic Attack")
             print("2. Special Ability")
             print("3. Try to Run")
@@ -235,6 +243,7 @@ class SimpleBattle:
         
         Returns: Integer damage amount
         """
+        #How the damage is calculated
         self.damage = attacker['strength'] - (defender['strength'] // 4)
         if self.damage < 1:
             self.damage = 1
@@ -248,6 +257,7 @@ class SimpleBattle:
         
         Reduces health, prevents negative health
         """
+        #Application of damage to target
         target['health'] -= damage
         if target['health'] < 0:
             target['health'] = 0
@@ -274,6 +284,7 @@ class SimpleBattle:
         
         Returns: True if escaped, False if failed
         """
+        #Uses random library to help determine escape chance
         import random
         if random.random() < 0.5:
             self.combat_active = False
@@ -304,6 +315,7 @@ def use_special_ability(character, enemy):
     Returns: String describing what happened
     Raises: AbilityOnCooldownError if ability was used recently
     """
+    #Determines which special ability to use based on class
     if character['class'] == 'Warrior':
         return warrior_power_strike(character, enemy)
     elif character['class'] == 'Mage':
@@ -317,7 +329,7 @@ def use_special_ability(character, enemy):
     # Execute appropriate ability
     # Track cooldowns (optional advanced feature)
     
-
+#Next 3 define the special abilities for each class and how much damage/healing they do
 def warrior_power_strike(character, enemy):
     """Warrior special ability"""
     damage = character['strength'] * 2 - (enemy['strength'] // 4)
@@ -348,6 +360,7 @@ def mage_fireball(character, enemy):
 
 def rogue_critical_strike(character, enemy):
     """Rogue special ability"""
+    #Uses random library to determine if critical strike is successful
     import random
     if random.random() < 0.5:
         damage = character['strength'] * 3 - (enemy['strength'] // 4)
