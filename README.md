@@ -68,5 +68,3 @@ Run with: `python -m pytest tests/`
 All integration tests pass.
 
 ```
-
-```
